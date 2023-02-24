@@ -51,8 +51,17 @@ class ItemsController < ApplicationController
   end
 
   def create
+    puts ENV["OPENAI_API_KEY"]
+    puts "BILLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!      %%%%%%%%%%%%%%%%%%%%%% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!   %%%%%%%%%%%%%%%%%%%%%%%%%"
+    client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    response = client.images.generate(parameters: { prompt: "A cool cowboy, with two leather holsters and a bullet belt", size: "256x256" })
     @item = Item.new(item_params)
     @item.user = current_user
+
+    if @item.image.blank?
+      @item.image = response.dig("data", 0, "url")
+      @item.save!
+    end
 
     if @item.save
       sendEvent("item_created", { item: item_params })
